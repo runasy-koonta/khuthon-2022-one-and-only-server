@@ -15,23 +15,28 @@ app.get('/', (req, res) => {
 
 const players: {
   playerId: string;
+  nickname: string;
   x: number;
   y: number;
 }[] = [];
 io.on('connection', (socket) => {
-  io.sockets.emit('newPlayer', {
-    playerId: socket.id,
-    x: 0,
-    y: 0,
-  });
-  for (const player of players) {
-    socket.emit('newPlayer', player);
-  }
+  socket.on('login', (nickname: string) => {
+    io.sockets.emit('newPlayer', {
+      playerId: socket.id,
+      nickname,
+      x: 0,
+      y: 0,
+    });
+    for (const player of players) {
+      socket.emit('newPlayer', player);
+    }
 
-  players.push({
-    playerId: socket.id,
-    x: 0,
-    y: 0,
+    players.push({
+      playerId: socket.id,
+      nickname,
+      x: 0,
+      y: 0,
+    });
   });
 
   socket.on('playerMove', (data) => {
