@@ -22,33 +22,39 @@ app.get('/', (req, res) => {
 
 const players: {
   playerId: string;
+  nickname: string;
   x: number;
   y: number;
 }[] = [];
 io.on('connection', (socket) => {
-  io.sockets.emit('newPlayer', {
-    playerId: socket.id,
-    x: 0,
-    y: 0,
-  });
-  for (const player of players) {
-    socket.emit('newPlayer', player);
-  }
-  connection.execute(
-    'SELECT * FROM boards',
-    function(err, results, fields) {
-      if (err) console.log(err);
-      else {
-        socket.emit('updateBoard', results);
-        console.log(results);
-      }
+  socket.on('login', (nickname: string) => {
+    io.sockets.emit('newPlayer', {
+      playerId: socket.id,
+      nickname,
+      x: 0,
+      y: 0,
+    });
+    for (const player of players) {
+      socket.emit('newPlayer', player);
     }
-  );
+  
+    connection.execute(
+      'SELECT * FROM boards',
+      function(err, results, fields) {
+        if (err) console.log(err);
+        else {
+          socket.emit('updateBoard', results);
+          console.log(results);
+        }
+      }
+    );
 
-  players.push({
-    playerId: socket.id,
-    x: 0,
-    y: 0,
+    players.push({
+      playerId: socket.id,
+      nickname,
+      x: 0,
+      y: 0,
+    });
   });
 
   socket.on('playerMove', (data) => {
@@ -87,6 +93,17 @@ io.on('connection', (socket) => {
         }
       }
     );
+  });
+
+  socket.on('voice', function (data) {
+    let newData = data.split(";");
+    newData[0] = "data:audio/ogg;";
+    newData = newData[0] + newData[1];
+
+    io.sockets.emit('voice', {
+      playerId: socket.id,
+      voice: newData,
+    });
   });
 });
 
