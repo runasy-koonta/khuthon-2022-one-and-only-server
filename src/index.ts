@@ -51,6 +51,18 @@ io.on('connection', (socket) => {
 
     io.sockets.emit('playerDisconnect', socket.id);
   });
+
+  socket.on('voice', function (data) {
+    let newData = data.split(";");
+    newData[0] = "data:audio/ogg;";
+    newData = newData[0] + newData[1];
+
+    io.sockets.emit('voice', {
+      playerId: socket.id,
+      voice: newData,
+    });
+  });
+
 });
 
 server.listen(3001, () => {
