@@ -1,6 +1,6 @@
 # Force sync origin to remote
-git checkout master
-git reset --hard origin/master
+git checkout main
+git reset --hard origin/main
 git pull -r
 
 # Build react app
